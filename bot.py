@@ -13,10 +13,10 @@ bot = telebot.TeleBot('7652238824:AAHbZCfTFE4Le7mfkbXdcthKJzUuAnPBSXA')
 def start(message):
     user_id = message.from_user.id
     if db.check_user(user_id):
-        bot.send_message(user_id, 'Привет!')
+        bot.send_message(user_id, 'Привет!', reply_markup=telebot.types.ReplyKeyboardRemove())
     else:
         bot.send_message(user_id, 'Привет! Давайте начнем регистрацию!\n'
-                                  'Введите ваше Имя!')
+                                  'Введите ваше Имя!', reply_markup=telebot.types.ReplyKeyboardRemove())
         # Переход на этап получения имени
         bot.register_next_step_handler(message, get_name)
 
