@@ -46,6 +46,11 @@ def get_pr_buttons():
     return result
 
 
+# Вывод всех продуктов
+def get_all_pr():
+    return sql.execute('SELECT * FROM products;').fetchall()
+
+
 # Вывод информации о конкретном продукте
 def get_exact_pr(pr_id):
     return sql.execute('SELECT * FROM products WHERE pr_id=?;', (pr_id,)).fetchone()
@@ -92,7 +97,7 @@ def change_pr_attr(keyword, new_value, attr=''):
 
 # Удаление товара из БД
 def del_product(pr_id):
-    sql.execute('DELETE FROM products WHERE pr_id=?;', (pr_id,))
+    sql.execute('DELETE FROM products WHERE pr_name=?;', (pr_id,))
     # Фиксируем изменения
     connection.commit()
 
