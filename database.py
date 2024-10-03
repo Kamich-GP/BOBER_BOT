@@ -96,8 +96,8 @@ def change_pr_attr(keyword, new_value, attr=''):
 
 
 # Удаление товара из БД
-def del_product(pr_id):
-    sql.execute('DELETE FROM products WHERE pr_name=?;', (pr_id,))
+def del_product(pr_name):
+    sql.execute('DELETE FROM products WHERE pr_name=?;', (pr_name,))
     # Фиксируем изменения
     connection.commit()
 
@@ -108,3 +108,47 @@ def check_pr():
         return True
     else:
         return False
+
+
+## Методы корзины ##
+# Отображение корзины
+def show_cart(tg_id):
+    return sql.execute('SELECT * FROM cart WHERE user_id=?;', (tg_id,)).fetchall()
+
+
+# Добавление товара в корзину
+def add_to_cart(tg_id, product, product_amount):
+    sql.execute('INSERT INTO cart VALUES (?, ?, ?);', (tg_id, product, product_amount))
+    # Фиксируем изменения
+    connection.commit()
+
+
+# Очистка корзины
+def clear_cart(tg_id):
+    sql.execute('DELETE FROM cart WHERE user_id=?;', (tg_id,))
+    # Фиксируем изменения
+    connection.commit()
+
+
+# Оформление заказа
+def make_order(tg_id):
+    # Достаем названия товаров и их количество с корзины пользователя
+    product_names = sql.execute('SELECT user_product FROM cart WHERE user_id=?;', (tg_id,)).fetchall()
+    product_quantities = sql.execute('SELECT product_amount FROM cart WHERE user_id=?;', (tg_id,)).fetchall()
+
+    # Работа со складом
+    product_counts = [sql.execute('SELECT pr_count FROM products WHERE pr_name=?;', (i[0],)).fetchone()[0] for i in product_names]
+    totals = []
+
+    for e in product_quantities:
+        for c in product_counts:
+            totals.append(c - e[0])
+
+    for t in totals:
+        for n in product_names:
+            sql.execute('UPDATE products SET pr_count=? WHERE pr_name=?;', (t, n))
+
+
+    #Фиксируем изменения
+    connection.commit()
+    return product_counts, totals
