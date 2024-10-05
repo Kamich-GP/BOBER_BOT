@@ -57,8 +57,8 @@ def get_exact_pr(pr_id):
 
 
 # Вывод цены конкретного продукта
-def get_exact_price(pr_id):
-    return sql.execute('SELECT pr_price FROM products WHERE pr_id=?;', (pr_id,)).fetchone()
+def get_exact_price(pr_name):
+    return sql.execute('SELECT pr_price FROM products WHERE pr_name=?;', (pr_name,)).fetchone()
 
 
 ## Методы для администрирования продуктов ##
@@ -146,7 +146,7 @@ def make_order(tg_id):
 
     for t in totals:
         for n in product_names:
-            sql.execute('UPDATE products SET pr_count=? WHERE pr_name=?;', (t, n))
+            sql.execute('UPDATE products SET pr_count=? WHERE pr_name=?;', (t, n[0]))
 
 
     #Фиксируем изменения

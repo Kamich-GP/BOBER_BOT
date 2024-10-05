@@ -73,23 +73,30 @@ def cart_handle(call):
         db.clear_cart(call.message.chat.id)
         bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
         bot.send_message(call.message.chat.id, 'Корзина очищена!', reply_markup=bt.main_menu(db.get_pr_buttons()))
+    elif call.data == 'order':
+        text = text.replace('Ваша корзина: ', 'Новый заказ!')
+        user_cart = db.show_cart(call.message.chat.id)
+        total = 0.0
+        for i in user_cart:
+            text += (f'Товар: {i[1]}\n'
+                     f'Количество: {i[2]}\n\n')
+            total = db.get_exact_price(i[1])[0] * i[2]
+        text += f'Итого: {round(total, 1)}\n'
+        bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
+        bot.send_message(call.message.chat.id, 'Отправьте локацию для доставки товара!',
+                         reply_markup=bt.location_button())
+        # Переход на этап получения локации
+        bot.register_next_step_handler(call.message, get_user_location, text)
     elif call.data == 'cart':
         user_cart = db.show_cart(call.message.chat.id)
         total = 0.0
         for i in user_cart:
             text += (f'Товар: {i[1]}\n'
                      f'Количество: {i[2]}\n\n')
-            total = db.get_exact_price(i[0])[0] * i[2]
+            total = db.get_exact_price(i[1])[0] * i[2]
         text += f'Итого: {round(total, 1)}'
         bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
-        bot.send_message(call.message.chat.id, text)
-    elif call.data == 'order':
-        text.replace('Ваша корзина: ', 'Новый заказ!')
-        bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
-        bot.send_message(call.message.chat.id, 'Отправьте локацию для доставки товара!',
-                         reply_markup=bt.location_button())
-        # Переход на этап получения локации
-        bot.register_next_step_handler(call, get_user_location, text)
+        bot.send_message(call.message.chat.id, text, reply_markup=bt.cart_buttons())
 
 
 # Этап получения локации
@@ -101,6 +108,7 @@ def get_user_location(message, text):
         bot.send_message(admin_id, text)
         bot.send_location(admin_id, latitude=message.location.latitude, longitude=message.location.longitude)
         db.make_order(user_id)
+        db.clear_cart(user_id)
         bot.send_message(user_id, 'Ваш заказ оформлен! Скоро с вами свяжутся специалисты!',
                          reply_markup=telebot.types.ReplyKeyboardRemove())
         bot.send_message(user_id, 'Выберите пункт меню:', reply_markup=bt.main_menu(db.get_pr_buttons()))

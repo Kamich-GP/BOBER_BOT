@@ -60,6 +60,23 @@ def choice_pr_buttons(pr_amount, plus_or_minus='', amount=1):
     kb.add(minus, count, plus)
     kb.row(back, to_cart)
 
+    return kb
+
+
+# Кнопки корзины
+def cart_buttons():
+    # Создаем пространство
+    kb = types.InlineKeyboardMarkup(row_width=2)
+    # Создаем сами кнопки
+    order = types.InlineKeyboardButton(text='Оформить заказ🧾', callback_data='order')
+    back = types.InlineKeyboardButton(text='Назад⬅', callback_data='back')
+    clear = types.InlineKeyboardButton(text='Очистить корзину🗑', callback_data='clear')
+    # Добавляем кнопки в пространство
+    kb.add(order, back)
+    kb.row(clear)
+
+    return kb
+
 
 ## Кнопки админ-панели ##
 # Меню администрации
